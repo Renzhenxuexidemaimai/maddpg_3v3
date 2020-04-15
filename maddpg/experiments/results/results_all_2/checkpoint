@@ -1,7 +1,0 @@
-model_checkpoint_path: "test_3v3"
-all_model_checkpoint_paths: "test_3v3_47100_90"
-all_model_checkpoint_paths: "test_3v3_51500_92"
-all_model_checkpoint_paths: "test_3v3_61600_88"
-all_model_checkpoint_paths: "test_3v3_65900_90"
-all_model_checkpoint_paths: "test_3v3_68900_95"
-all_model_checkpoint_paths: "test_3v3"

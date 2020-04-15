@@ -1,3 +1,0 @@
-model_checkpoint_path: "/home/zgy/openai-maddpg/maddpg/experiments"
-all_model_checkpoint_paths: "/home/zgy/openai-maddpg/maddpg/experiments_19500_83"
-all_model_checkpoint_paths: "/home/zgy/openai-maddpg/maddpg/experiments"
