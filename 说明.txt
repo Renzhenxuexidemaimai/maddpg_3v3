@@ -4,7 +4,7 @@
 3、场景是3v3的
 4、训练时每隔一定训练次数输出胜率
 5、蓝方随机运功
-
+multiprocess
 在openai-maddpg/maddpg/experiments目录下可运行测试用例：
 训练运行命令
 python3 train.py --scenario competition_3v3 --save-dir /home/liyuan/pythonCode/openai-maddpg/maddpg/experiments/test
