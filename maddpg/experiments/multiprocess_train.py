@@ -383,7 +383,7 @@ def train(arglist, PID=None, lock=None):
                     str5 = str(np.mean(agent_rewards[2][-arglist.save_rate:]))
                     str6 = str(red_win)
                     mydata = [str1, str2, str3, str4, str5, str6]
-                    out = open('1mydata.csv', 'a', newline='')
+                    out = open('1mydata_{}.csv'.format(PID), 'a', newline='')
                     csv_write = csv.writer(out, dialect='excel')
                     csv_write.writerow(mydata)
 
