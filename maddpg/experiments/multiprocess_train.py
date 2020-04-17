@@ -316,7 +316,7 @@ def train(arglist, PID=None, queue=None, lock=None):
                 data = (obs_n, action_n, rew_n, new_obs_n, done_n)
                 queue.put(data)
                 lock.acquire()
-                print("PID {}, queue size {}".format(PID, queue.qsize()))
+                # print("PID {}, queue size {}".format(PID, queue.qsize()))
                 data = queue.get()
                 obs_n, action_n, rew_n, new_obs_n, done_n = data
                 replay_buffer.add(obs_n, action_n, rew_n, new_obs_n, done_n)
