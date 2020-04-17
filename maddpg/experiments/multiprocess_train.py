@@ -7,15 +7,17 @@ import copy
 import csv
 from PIL import Image
 import multiprocessing as mul
+import threading
 
 import maddpg.common.tf_util as U
 from maddpg.trainer.maddpg import MADDPGAgentTrainer
 import tensorflow.contrib.layers as layers
 from maddpg.trainer.replay_buffer import ReplayBuffer
 
+
 replay_buffer = ReplayBuffer(1e6)
-queue = mul.Queue(5)
-lock = mul.Lock()
+# queue = mul.Queue(5)
+lock = threading.Lock()
 
 
 def parse_args():
@@ -234,7 +236,7 @@ def initialize_variables(env):
     return episode_rewards, agent_rewards, final_ep_rewards, final_ep_ag_rewards, agent_info
 
 
-def train(arglist, PID=None, queue=None, lock=None):
+def train(arglist, PID=None, lock=None):
     # global replay_buffer
     with U.single_threaded_session():
         # Create environment
@@ -311,16 +313,11 @@ def train(arglist, PID=None, queue=None, lock=None):
                         rew_n[i] += (arglist.max_episode_len - episode_step) / arglist.max_episode_len
 
             # collect experience
-            if not arglist.multiprocess:
-                replay_buffer.add(obs_n, action_n, rew_n, new_obs_n, done_n)
-            else:
-                data = (obs_n, action_n, rew_n, new_obs_n, done_n)
-                queue.put(data)
+            if arglist.multiprocess:
                 lock.acquire()
-                # print("PID {}, queue size {}".format(PID, queue.qsize()))
-                data = queue.get()
-                obs_n, action_n, rew_n, new_obs_n, done_n = data
-                replay_buffer.add(obs_n, action_n, rew_n, new_obs_n, done_n)
+                # print("Thread ID {}".format(PID))
+            replay_buffer.add(obs_n, action_n, rew_n, new_obs_n, done_n)
+            if arglist.multiprocess:
                 lock.release()
 
             obs_n = new_obs_n
@@ -350,11 +347,14 @@ def train(arglist, PID=None, queue=None, lock=None):
                         pickle.dump(agent_info[:-1], fp)
                     break
                 continue
-
+            if arglist.multiprocess:
+                lock.acquire()
             for i, agent in enumerate(trainers):
                 agent.preupdate()
             for i, agent in enumerate(trainers):
                 agent.update(trainers, train_step)
+            if arglist.multiprocess:
+                lock.release()
 
             # save model, display training output
             if (terminal or done) and (len(episode_rewards) % arglist.save_rate == 0):
@@ -407,7 +407,7 @@ def main():
         train(arglist)
     else:
         num_process = 3
-        process = [mul.Process(target=train, args=(arglist, i, queue, lock)) for i in range(num_process)]
+        process = [threading.Thread(target=train, args=(arglist, i, lock)) for i in range(num_process)]
         for p in process:
             p.start()
         for p in process:

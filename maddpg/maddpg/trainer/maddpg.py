@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import threading
 import tensorflow as tf
 import maddpg.common.tf_util as U
 
@@ -227,26 +228,14 @@ class MADDPGAgentTrainer(AgentTrainer):
         obs_next_n = []
         act_n = []
         index = self.replay_sample_index
-        # for i in range(self.n):
-        #     obs, act, rew, obs_next, done = agents[i].replay_buffer.sample_index(index)
-        #     obs_n.append(obs)
-        #     obs_next_n.append(obs_next)
-        #     act_n.append(act)
-        # obs, act, rew, obs_next, done = self.replay_buffer.sample_index(index)
         obs_n_a, act_n_a, rew_n_a, obs_next_n_a, done_n_a = self.replay_buffer.sample_index(index)
-        # obs_n_a = np.reshape(obs_n_a, [self.n, self.args.batch_size, -1])
-        # act_n_a = np.reshape(act_n_a, [self.n, self.args.batch_size, -1])
-        # rew_n_a = np.reshape(rew_n_a, [self.n, self.args.batch_size])
-        # obs_next_n_a = np.reshape(obs_next_n_a, [self.n, self.args.batch_size, -1])
-        # done_n_a = np.reshape(done_n_a, [self.n, self.args.batch_size])
+
         for i in range(self.n):
             obs_n.append(obs_n_a[:, i, :])
             obs_next_n.append(obs_next_n_a[:, i, :])
             act_n.append(act_n_a[:, i, :])
         rew, done = rew_n_a[:, self.agent_index], done_n_a[:, self.agent_index]
-        # print(rew.shape, done.shape)
-        # print(rew)
-        # print(done)
+
         # train q network
         num_sample = 1
         target_q = 0.0
@@ -268,5 +257,4 @@ class MADDPGAgentTrainer(AgentTrainer):
 
         self.actor.p_update()
         self.critic.q_update()
-
         return [q_loss, p_loss, np.mean(target_q), np.mean(rew), np.mean(target_q_next), np.std(target_q)]
