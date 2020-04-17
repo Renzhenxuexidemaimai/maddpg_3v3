@@ -17,6 +17,7 @@ replay_buffer = ReplayBuffer(1e6)
 queue = mul.Queue(5)
 lock = mul.Lock()
 
+
 def parse_args():
     parser = argparse.ArgumentParser("Reinforcement Learning experiments for multiagent environments")
     # Environment
@@ -358,7 +359,8 @@ def train(arglist, PID=None, queue=None, lock=None):
             # save model, display training output
             if (terminal or done) and (len(episode_rewards) % arglist.save_rate == 0):
                 if red_win >= 0.8 * arglist.save_rate:
-                    temp_dir = arglist.save_dir + "_" + str(len(episode_rewards)) + "_" + str(red_win)
+                    temp_dir = arglist.save_dir + "_" + str(len(episode_rewards)) + "_" + str(red_win) + "_{}".format(
+                        PID)
                     U.save_state(temp_dir, saver=saver)
 
                 # print statement depends on whether or not there are adversaries
@@ -367,9 +369,11 @@ def train(arglist, PID=None, queue=None, lock=None):
                         train_step, len(episode_rewards), np.mean(episode_rewards[-arglist.save_rate:]),
                         round(time.time() - t_start, 3)))
                 else:
-                    print("PID {}, steps: {}, episodes: {}, mean episode reward: {}, agent episode reward: {}, time: {}".format(
-                        PID, train_step, len(episode_rewards), np.mean(episode_rewards[-arglist.save_rate:]),
-                        [np.mean(rew[-arglist.save_rate:]) for rew in agent_rewards], round(time.time() - t_start, 3)))
+                    print(
+                        "PID {}, steps: {}, episodes: {}, mean episode reward: {}, agent episode reward: {}, time: {}".format(
+                            PID, train_step, len(episode_rewards), np.mean(episode_rewards[-arglist.save_rate:]),
+                            [np.mean(rew[-arglist.save_rate:]) for rew in agent_rewards],
+                            round(time.time() - t_start, 3)))
                     print("red win: {}, green win: {}, red all leave: {}, green all leave: {}".format(
                         red_win, green_win, red_leave, green_leave))
                     str1 = str(len(episode_rewards))
@@ -408,6 +412,7 @@ def main():
             p.start()
         for p in process:
             p.join()
+
 
 if __name__ == '__main__':
     main()
